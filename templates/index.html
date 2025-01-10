@@ -27,72 +27,7 @@
         }
     </style>
     <link rel="stylesheet" href="../static/style.css">
-</head>```javascript
-// Function to fetch and display tasks
-async function fetchTasks() {
-    try {
-        const response = await fetch('/tasks');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const tasks = await response.json();
-        renderTasks(tasks);
-    } catch (error) {
-        console.error('Error fetching tasks:', error);
-    }
-}
-
-// Function to render tasks in the UI
-function renderTasks(tasks) {
-    taskListElement.innerHTML = '';
-    tasks.forEach((task, index) => {
-        const li = document.createElement('li');
-        li.textContent = task;
-        li.addEventListener('click', () => {
-            deleteTask(task);
-        });
-        taskListElement.appendChild(li);
-    });
-}
-
-// Function to add a task
-async function addTask() {
-    const task = taskInput.value.trim();
-    if (task) {
-        try {
-            await fetch('/tasks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ task })
-            });
-            taskInput.value = '';
-            fetchTasks(); // Refresh the task list
-        } catch (error) {
-            console.error('Error adding task:', error);
-        }
-    }
-}
-
-// Function to delete a task
-async function deleteTask(task) {
-    try {
-        await fetch(`/tasks/${encodeURIComponent(task)}`, {
-            method: 'DELETE'
-        });
-        fetchTasks(); // Refresh the task list
-    } catch (error) {
-        console.error('Error deleting task:', error);
-    }
-}
-
-// Event listener for the Add Task button
-document.getElementById('addTaskBtn').addEventListener('click', addTask);
-
-// Initial fetch to load tasks
-fetchTasks();
-```
+</head>
 <body>
     <h1>To-Do List</h1>
     <input type="text" id="taskInput" placeholder="Enter a task">

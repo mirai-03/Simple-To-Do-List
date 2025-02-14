@@ -1,10 +1,17 @@
 from flask import Flask, jsonify, request, render_template
 from dataStructures import LinkedList, Queue
+import heapq
 
 app = Flask(__name__)
 
 task_list = LinkedList()
 priority_queue = Queue()
+
+priority_map = {
+    'high': 1,
+    'medium': 2,
+    'low': 3
+}
 
 @app.route('/')
 def home():
@@ -18,23 +25,23 @@ def get_tasks():
 @app.route('/tasks', methods=['POST'])
 def add_task():
     task = request.json.get('task')
-    if task:
-        task_list.add_task(task)
-        priority_queue.enqueue(task)  # Add to queue for prioritization
+    priority = request.json.get('priority')
+
+    if task and priority in priority_map:
+        task_list.add_task((task, priority))  
+        priority_queue.enqueue((priority_map[priority], task))
         return jsonify({"message": "Task added!"}), 201
-    return jsonify({"error": "Task is required!"}), 400
+    return jsonify({"error": "Task and valid priority required!"}), 400
 
 @app.route('/tasks/<task>', methods=['DELETE'])
 def delete_task(task):
     task_list.remove_task(task)
+    priority_queue.remove_task(task)
     return jsonify({"message": "Task removed!"})
 
-@app.route('/prioritize', methods=['POST'])
-def prioritize_task():
-    if not priority_queue.is_empty():
-        highest_priority_task = priority_queue.dequeue()
-        return jsonify({"prioritized_task": highest_priority_task})
-    return jsonify({"message": "No tasks to prioritize!"}), 404
+@app.route('/prioritized-tasks', methods=['GET'])
+def get_prioritized_tasks():
+    return jsonify(priority_queue.get_tasks())
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,64 +1,62 @@
-class Node:
-    def __init__(self, task):
-        self.task = task
-        self.next = None
+import heapq
 
 class LinkedList:
+    class Node:
+        def __init__(self, data):
+            self.data = data
+            self.next = None
+
     def __init__(self):
         self.head = None
-        self.tail = None
 
     def add_task(self, task):
-        new_node = Node(task)
+        new_node = self.Node(task)
         if not self.head:
             self.head = new_node
-            self.tail = new_node
         else:
-            self.tail.next = new_node
-            self.tail = new_node
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
 
     def remove_task(self, task):
         if not self.head:
-            return
-
-        if self.head.task == task:
+            return False
+        if self.head.data[0] == task:
             self.head = self.head.next
-            return
-
+            return True
         current = self.head
-        while current.next:
-            if current.next.task == task:
-                current.next = current.next.next
-                if not current.next:
-                    self.tail = current  # Update tail if needed
-                return
+        while current.next and current.next.data[0] != task:
             current = current.next
+        if current.next:
+            current.next = current.next.next
+            return True
+        return False
 
     def get_tasks(self):
         tasks = []
         current = self.head
         while current:
-            tasks.append(current.task)
+            tasks.append(current.data)
             current = current.next
         return tasks
 
+
 class Queue:
     def __init__(self):
-        self.items = []
+        self.queue = []
 
-    def enqueue(self, task):
-        self.items.append(task)
+    def enqueue(self, item):
+        heapq.heappush(self.queue, item)  
 
     def dequeue(self):
-        if not self.is_empty():
-            return self.items.pop(0)
+        if self.queue:
+            return heapq.heappop(self.queue)
+        return None
 
-    def is_empty(self):
-        return len(self.items) == 0
-
-    def peek(self):
-        if not self.is_empty():
-            return self.items[0]
+    def remove_task(self, task):
+        self.queue = [item for item in self.queue if item[1] != task]
+        heapq.heapify(self.queue)  
 
     def get_tasks(self):
-        return self.items
+        return sorted(self.queue)  
